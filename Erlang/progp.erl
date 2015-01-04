@@ -4,12 +4,12 @@
 -license('MIT').
 -export([bernoulli/1,bernoulliseq/1]).
 
-factorial(N) ->
+factorial(N) when is_integer(N) ->
     tail_factorial(N,1).
 
 tail_factorial(0,M) ->
     M;
-tail_factorial(N,M) when N > 0 ->
+tail_factorial(N,M) ->
     tail_factorial(N-1,N*M).
 
 % n is always 0 in the recursive definition.
@@ -21,5 +21,5 @@ bernoulli(M) when is_integer(M) ->
 bernoulliseq(M) when is_integer(M) ->
     [bernoulli(N) || N <- lists:seq(0,M)].
 
-binomial(N,K) when is_number(N), is_number(K) ->
+binomial(N,K) when is_integer(N), is_integer(K) ->
     factorial(N) div (factorial(N-K) * factorial(K)).
