@@ -2,7 +2,7 @@
 -module(progp).
 -date('4/1-15').
 -license('MIT').
--export([bernoulli/1,factorial/1,binomial/2,bernoulliseq/1]).
+-export([bernoulli/1,bernoulliseq/1]).
 
 factorial(N) ->
     tail_factorial(N,1).
