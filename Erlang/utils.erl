@@ -20,19 +20,19 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 % THE SOFTWARE.
 
--module(progp).
--date('4/1-15').
+-module(utils).
+-date('5/1-15').
 -author('Christopher Lillthors').
 -license('MIT').
--import(utils,[factorial/1,binomial/2]).
--export([bernoulli/1,bernoulliseq/1]).
+-export([factorial/1,binomial/2]).
 
-% n is always 0 in the recursive definition.
-% see wikipedia for reference.
-bernoulli(0) ->
-    1;
-bernoulli(M) when is_integer(M) ->
-    0 - lists:sum([binomial(M,K)* (bernoulli(K)/(M-K+1)) || K <- lists:seq(0,M-1)]).
+factorial(N) when is_integer(N) ->
+    tail_factorial(N,1).
 
-bernoulliseq(M) when is_integer(M) ->
-    [bernoulli(N) || N <- lists:seq(0,M)].
+tail_factorial(0,M) ->
+    M;
+tail_factorial(N,M) ->
+    tail_factorial(N-1,N*M).
+
+binomial(N,K) when is_integer(N), is_integer(K) ->
+    factorial(N) div (factorial(N-K) * factorial(K)).
