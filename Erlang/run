@@ -1,0 +1,19 @@
+#!/usr/bin/env escript
+
+main([N]) ->
+	try
+		M = list_to_integer(N),
+		io:format("Running bernoulliconcurrent(~p)~n",[M]),
+		progp:bernoulliconcurrent(M)
+	catch
+		%gotta catch them all
+		_:_ ->
+			usage()
+	end;
+
+main(_) ->
+	usage().
+
+usage() ->
+	io:format("Please specify the number of bernoulli numbers you want"),
+	halt(1).

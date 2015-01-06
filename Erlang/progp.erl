@@ -25,7 +25,7 @@
 -author('Christopher Lillthors').
 -license('MIT').
 -import(utils,[factorial/1,binomial/2]).
--export([bernoulli/1,bernoulliseq/1]).
+-export([bernoulli/1,bernoulliseq/1,bernoulliconcurrent/1]).
 
 % n is always 0 in the recursive definition.
 % see wikipedia for reference.
@@ -36,3 +36,26 @@ bernoulli(M) when is_integer(M) ->
 
 bernoulliseq(M) when is_integer(M) ->
     [bernoulli(N) || N <- lists:seq(0,M)].
+
+bernoulliconcurrent(M) when is_integer(M) ->
+    Wait_pid = self(),
+    Pid = spawn(fun() -> printer(M,Wait_pid) end),
+    [spawn(fun() -> Pid ! {bernoulli(N),N} end) || N <- lists:seq(0,M)],
+    receive
+        die ->
+            io:format("Got all the numbers, will now quit program...~n"),
+            true
+    end.
+
+printer(N,Done_PID) when is_integer(N), is_pid(Done_PID) ->
+    receive
+	{Value,Number} ->
+	    io:format("Got value ~p from number ~p~n", [Value,Number]),
+        if
+            N == 0 ->
+                Done_PID ! die,
+                true;
+            true ->
+                printer(N-1,Done_PID)
+        end
+    end.
