@@ -25,7 +25,7 @@
 -author('Christopher Lillthors').
 -license('MIT').
 -import(utils,[factorial/1,binomial/2]).
--export([bernoulli/1,bernoulliseq/1,bernoulliconcurrent/1,bernoullidistributed/1]).
+-export([bernoulli/1,bernoulliseq/1,bernoulliconcurrent/1,bernoullidistributed/1,bernoulli_PID/2]).
 
 % n is always 0 in the recursive definition.
 % see wikipedia for reference.
@@ -58,7 +58,7 @@ bernoullidistributed(M) when is_integer(M) ->
     Wait_pid = self(), % PID to this process.
     Printer_PID = spawn(fun() -> printer(M,Wait_pid) end),
     lists:foreach(fun(Node) ->
-        [spawn(Node,?MODULE,bernoulli_PID(N,Printer_PID)) || N <- lists:seq(0,M)] end,
+        [spawn(Node,?MODULE,bernoulli_PID,[N,Printer_PID]) || N <- lists:seq(0,M)] end,
         Nodes
     ),
     receive
