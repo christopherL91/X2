@@ -50,11 +50,12 @@ bernoulliconcurrent(M) when is_integer(M) ->
 
 % Private function.
 bernoulli_PID(N,Printer_PID) when is_integer(N),is_pid(Printer_PID) ->
+    io:format("Hello from bernoulli_PID ~p ~p~n",[N,Printer_PID])
     Printer_PID ! {bernoulli(N),N}.
 
 % Distributed concurrency.
 bernoullidistributed(M) when is_integer(M) ->
-    Nodes = ['lillt@Golly','kth@share-01'], % A list of nodes.
+    Nodes = ['lillt@104.131.23.38'],
     %Connect to each node.
     [net_kernel:connect_node(Node) || Node <- Nodes],
     Wait_pid = self(), % PID to this process.
@@ -80,4 +81,7 @@ printer(N,Wait_pid) when is_integer(N), is_pid(Wait_pid) ->
             true ->
                 printer(N-1,Wait_pid)
         end
+    _ ->
+        io:format("Something else"),
+        printer(N-1,Wait_pid)
     end.
