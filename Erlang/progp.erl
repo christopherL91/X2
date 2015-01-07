@@ -25,7 +25,7 @@
 -author('Christopher Lillthors').
 -license('MIT').
 -import(utils,[factorial/1,binomial/2]).
--export([bernoulli/1,bernoulliseq/1,bernoulliconcurrent/1]).
+-export([bernoulli/1,bernoulliseq/1,bernoulliconcurrent/1,bernoullidistributed/1]).
 
 % n is always 0 in the recursive definition.
 % see wikipedia for reference.
@@ -37,25 +37,45 @@ bernoulli(M) when is_integer(M) ->
 bernoulliseq(M) when is_integer(M) ->
     [bernoulli(N) || N <- lists:seq(0,M)].
 
+% Local concurrency
 bernoulliconcurrent(M) when is_integer(M) ->
     Wait_pid = self(),
-    Pid = spawn(fun() -> printer(M,Wait_pid) end),
-    [spawn(fun() -> Pid ! {bernoulli(N),N} end) || N <- lists:seq(0,M)],
+    Printer_PID = spawn(fun() -> printer(M,Wait_pid) end),
+    [spawn(fun() -> Printer_PID ! {bernoulli(N),N, node()} end) || N <- lists:seq(0,M)],
     receive
         die ->
             io:format("Got all the numbers, will now quit program...~n"),
             true
     end.
 
-printer(N,Done_PID) when is_integer(N), is_pid(Done_PID) ->
+% Private function.
+bernoulli_PID(N,Printer_PID) when is_integer(N),is_pid(Printer_PID) ->
+    Printer_PID ! {node(),bernoulli(N),N}.
+
+% Distributed concurrency.
+bernoullidistributed(M) when is_integer(M) ->
+    Nodes = ['lillt@Golly','kth@share-01'], % A list of nodes.
+    Wait_pid = self(), % PID to this process.
+    Printer_PID = spawn(fun() -> printer(M,Wait_pid) end),
+    lists:foreach(fun(Node) ->
+        [spawn(Node,?MODULE,bernoulli_PID(N,Printer_PID)) || N <- lists:seq(0,M)] end,
+        Nodes
+    ),
     receive
-	{Value,Number} ->
-	    io:format("Got value ~p from number ~p~n", [Value,Number]),
+        die ->
+            io:format("Got all the numbers, will now quit program...~n"),
+            true
+    end.
+
+printer(N,Wait_pid) when is_integer(N), is_pid(Wait_pid) ->
+    receive
+	{Node,Value,Number} ->
+	    io:format("[~p]: Got value ~p from number ~p~n", [Node,Value,Number]),
         if
             N == 0 ->
-                Done_PID ! die,
+                Wait_pid ! die,
                 true;
             true ->
-                printer(N-1,Done_PID)
+                printer(N-1,Wait_pid)
         end
     end.
