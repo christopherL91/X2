@@ -54,7 +54,7 @@ bernoulli_PID(N,Printer_PID) when is_integer(N),is_pid(Printer_PID) ->
 
 % Distributed concurrency.
 bernoullidistributed(M) when is_integer(M) ->
-    Nodes = ['lillt@104.131.23.38'],
+    Nodes = ['lillt@104.131.23.38','kth@130.237.223.174'],
     %Connect to each node.
     [net_kernel:connect_node(Node) || Node <- Nodes],
     Wait_pid = self(), % PID to this process.
