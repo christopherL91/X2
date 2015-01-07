@@ -50,7 +50,7 @@ bernoulliconcurrent(M) when is_integer(M) ->
 
 % Private function.
 bernoulli_PID(N,Printer_PID) when is_integer(N),is_pid(Printer_PID) ->
-    io:format("Hello from bernoulli_PID ~p ~p~n",[N,Printer_PID])
+    io:format("Hello from bernoulli_PID ~p ~p~n",[N,Printer_PID]),
     Printer_PID ! {bernoulli(N),N}.
 
 % Distributed concurrency.
@@ -80,7 +80,7 @@ printer(N,Wait_pid) when is_integer(N), is_pid(Wait_pid) ->
                 true;
             true ->
                 printer(N-1,Wait_pid)
-        end
+        end;
     _ ->
         io:format("Something else"),
         printer(N-1,Wait_pid)
