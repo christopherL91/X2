@@ -41,7 +41,7 @@ bernoulliseq(M) when is_integer(M) ->
 bernoulliconcurrent(M) when is_integer(M) ->
     Wait_pid = self(),
     Printer_PID = spawn(fun() -> printer(M,Wait_pid) end),
-    [spawn(fun() -> Printer_PID ! {bernoulli(N),N, node()} end) || N <- lists:seq(0,M)],
+    [spawn(fun() -> Printer_PID ! {node(),bernoulli(N),N} end) || N <- lists:seq(0,M)],
     receive
         die ->
             io:format("Got all the numbers, will now quit program...~n"),
@@ -50,7 +50,7 @@ bernoulliconcurrent(M) when is_integer(M) ->
 
 % Private function.
 bernoulli_PID(N,Printer_PID) when is_integer(N),is_pid(Printer_PID) ->
-    Printer_PID ! {node(),bernoulli(N),N}.
+    Printer_PID ! {bernoulli(N),N}.
 
 % Distributed concurrency.
 bernoullidistributed(M) when is_integer(M) ->
@@ -70,7 +70,7 @@ bernoullidistributed(M) when is_integer(M) ->
 printer(N,Wait_pid) when is_integer(N), is_pid(Wait_pid) ->
     receive
 	{Node,Value,Number} ->
-	    io:format("[~p]: Got value ~p from number ~p~n", [Node,Value,Number]),
+        io:format("Node: ~p got value:~p from number ~p~n",[Node,Value,Number]),
         if
             N == 0 ->
                 Wait_pid ! die,
